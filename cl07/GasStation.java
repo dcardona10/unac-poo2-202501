@@ -1,7 +1,9 @@
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.text.DecimalFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class GasStation {
     private JPanel pnlMain;
@@ -21,6 +23,7 @@ public class GasStation {
     private JButton btnFinish;
     private JLabel lblTotal;
     private JTextField txtTotal;
+    private JTable tblSales;
 
     private double regularPrice = 0;
     private double premiumPrice = 0;
@@ -37,6 +40,15 @@ public class GasStation {
         ButtonGroup fuelTypes = new ButtonGroup();
         fuelTypes.add(rbtnRegular);
         fuelTypes.add(rbtnPremium);
+
+        DefaultTableModel model = new DefaultTableModel();
+        model.addColumn("Date");
+        model.addColumn("Fuel Type");
+        model.addColumn("Gallons");
+        model.addColumn("Total");
+
+        tblSales.setModel(model);
+        tblSales.setAutoCreateColumnsFromModel(true);
 
         rbtnEnableEdit.addActionListener(new ActionListener() {
             @Override
@@ -93,10 +105,21 @@ public class GasStation {
                             break;
                     }
                     txtTotal.setText(String.format("%.2f%n", total).replace(",", "."));
+                    LocalDateTime currentTime = LocalDateTime.now();
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                    String formattedTime = currentTime.format(formatter);
+                    model.addRow(new Object[] {formattedTime, fuelType == 1 ? "Regular" : "Premium", String.format("%.2f%n", gallons), String.format("%.2f%n", total)});
+                    tblSales.repaint();
+                    clearAll();
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(null, "Error", "Please enter a valid value", JOptionPane.WARNING_MESSAGE);
                 }
             }
         });
+    }
+
+    private void clearAll() {
+        txtGallons.setText("");
+        txtTotal.setText("");
     }
 }
